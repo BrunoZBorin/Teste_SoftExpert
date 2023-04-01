@@ -1,0 +1,11 @@
+table > tbody > tr {
+    cursor: pointer;
+}
+
+table > tbody > tr.selected {
+    background-color: rgba(0, 204, 255, 0.204);
+}
+
+label {
+    font-weight: 500;
+}
