@@ -87,8 +87,15 @@ class VendaController
         $sql = 'DELETE FROM vendas WHERE id = ?';
         $statement = $this->pdo->prepare($sql);
         $statement->bindValue(1, $id);
-
-        return $statement->execute();
+        try
+        {
+            $result = $statement->execute();
+        }
+        catch(\PDOException $e)
+        {
+            return $e->getMessage();
+        }
+        return $result;
     }
 
     /**
@@ -96,11 +103,17 @@ class VendaController
      */
     public function all()
     {
-        $vendaList = $this->pdo
-            ->query('SELECT * FROM vendas;')
-            ->fetchAll(\PDO::FETCH_ASSOC);
-        
-        return $vendaList;
+        $sth = $this->pdo->prepare("SELECT * FROM vendas ORDER BY ID_VENDA;");
+        $sth->execute();
+        try
+        {
+            $result = $sth->fetchAll();
+        }
+        catch(\PDOException $e)
+        {
+            return $e->getMessage();
+        }
+        return $result; 
         
     }
 

@@ -53,8 +53,15 @@ class TipoController
         $sql = 'DELETE FROM tipos WHERE id = ?';
         $statement = $this->pdo->prepare($sql);
         $statement->bindValue(1, $id);
-
-        return $statement->execute();
+        try
+        {
+            $result = $statement->execute();
+        }
+        catch(\PDOException $e)
+        {
+            return $e->getMessage();
+        }
+        return $result;
     }
 
     public function update($tipo)
@@ -68,7 +75,15 @@ class TipoController
         $statement->bindValue(':id_tipo', $t->id_tipo);
         $statement->bindValue(':descricao', $t->descricao);
         $statement->bindValue(':imposto', $t->imposto);
-        return $statement->execute();
+        try
+        {
+            $result = $statement->execute();
+        }
+        catch(\PDOException $e)
+        {
+            return $e->getMessage();
+        }
+        return $result;
     }
 
     /**
@@ -76,11 +91,17 @@ class TipoController
      */
     public function all()
     {
-        $tipoList = $this->pdo
-            ->query('SELECT * FROM tipos;')
-            ->fetchAll(\PDO::FETCH_ASSOC);
-        
-        return $tipoList;
+        $sth = $this->pdo->prepare("SELECT * FROM tipos ORDER BY ID_TIPO;");
+        $sth->execute();
+        try
+        {
+            $result = $sth->fetchAll();
+        }
+        catch(\PDOException $e)
+        {
+            return $e->getMessage();
+        }
+        return $result; 
     }
 
 }

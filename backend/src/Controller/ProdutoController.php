@@ -55,7 +55,15 @@ class ProdutoController
         $sql = 'DELETE FROM produtos WHERE id_produto = ?';
         $statement = $this->pdo->prepare($sql);
         $statement->bindValue(1, $params['id']);
-        return $statement->execute();
+        try
+        {
+            $result = $statement->execute();
+        }
+        catch(\PDOException $e)
+        {
+            return $e->getMessage();
+        }
+        return $result;
     }
 
     public function update($produto)
@@ -71,7 +79,15 @@ class ProdutoController
         $statement->bindValue(':descricao', $p->descricao);
         $statement->bindValue(':valor', $p->valor);
         $statement->bindValue(':cod_tipo', $p->cod_tipo);
-        return $statement->execute();
+        try
+        {
+            $result = $statement->execute();
+        }
+        catch(\PDOException $e)
+        {
+            return $e->getMessage();
+        }
+        return $result;
     }
 
     /**
@@ -79,11 +95,17 @@ class ProdutoController
      */
     public function all()
     {
-        $produtoList = $this->pdo
-            ->query('SELECT * FROM produtos;')
-            ->fetchAll(\PDO::FETCH_ASSOC);
-        return $produtoList;
-        
+        $sth = $this->pdo->prepare("SELECT * FROM produtos ORDER BY ID_PRODUTO;");
+        $sth->execute();
+        try
+        {
+            $result = $sth->fetchAll();
+        }
+        catch(\PDOException $e)
+        {
+            return $e->getMessage();
+        }
+        return $result; 
     }
 
 }

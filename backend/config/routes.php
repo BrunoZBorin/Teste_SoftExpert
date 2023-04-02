@@ -6,6 +6,7 @@ namespace Teste\Pdo\Config;
 header('Content-type: application/json');
 header('Access-Control-Allow-Origin: *');
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Access-Control-Allow-Headers: *");
 
 use Teste\Pdo\Controller\ProdutoController;
 use Teste\Pdo\Controller\TipoController;

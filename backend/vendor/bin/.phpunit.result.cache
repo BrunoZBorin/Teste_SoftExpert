@@ -1,1 +1,1 @@
-{"version":1,"defects":[],"times":{"Teste\\Pdo\\Testes\\VendasTest::teste1":0.174}}
+{"version":1,"defects":{"Teste\\Pdo\\Testes\\VendasTest::testaValorImpostos":4},"times":{"Teste\\Pdo\\Testes\\VendasTest::teste1":0.174,"Teste\\Pdo\\Testes\\VendasTest::testaValorTotal":0.007,"Teste\\Pdo\\Testes\\VendasTest::testaValorImpostos":0}}

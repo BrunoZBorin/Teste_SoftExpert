@@ -30,10 +30,10 @@ class Produto
         return $this->valor;
      }
 
-     public function setTipoId(Tipo $tipo){
+     public function setTipo(Tipo $tipo){
         $this->tipo = $tipo;
      }
-     public function getTipoId(){
+     public function getTipo(){
         return $this->tipo;
      }
 }
