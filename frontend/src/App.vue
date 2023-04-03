@@ -31,7 +31,7 @@ import { RouterLink, RouterView } from 'vue-router'
 <style scoped>
 
 #body {
-  margin: 90px 60px 90px 60px;
+  margin: 60px 30px 60px 30px;
 }
 
 header {

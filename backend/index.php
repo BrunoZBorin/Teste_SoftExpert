@@ -5,10 +5,6 @@ require_once 'vendor/autoload.php';
 
 $pdo = \Teste\Pdo\Infrastructure\Persistence\ConnectionCreator::createConnection();
 
-use \Teste\Pdo\Domain\Model\Produto;
-use \Teste\Pdo\Domain\Model\Venda;
-use \Teste\Pdo\Domain\Model\ItensVenda;
-
 
 use \Teste\Pdo\Config\Routes;
 

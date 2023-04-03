@@ -28,7 +28,26 @@
               </div>
               <div class="col-12">
                 <label for="inputValor">Valor</label>
-                <input id="inputValor" @beforeinput="formatMoney($event, $el)" v-mask="'################'" type="text" class="form-control" v-model="produtoModal.valor">
+                <DebouncedCurrencyInput 
+                  id="inputValor" 
+                  class="form-control"
+                  v-model="produtoModal.valor"
+                  :value="produtoModal.valor"
+                  :options="{
+                    'currency': 'BRL',
+                    'currencyDisplay': 'hidden',
+                    'valueRange': {
+                      'max': 999999
+                    },
+                    'precision': 2,
+                    'hideCurrencySymbolOnFocus': false,
+                    'hideGroupingSeparatorOnFocus': false,
+                    'hideNegligibleDecimalDigitsOnFocus': false,
+                    'autoDecimalDigits': true,
+                    'useGrouping': true,
+                    'accountingSign': false
+                  }"
+                />
               </div>
             </div>
           </div>
@@ -44,7 +63,7 @@
 
     <h3>Produtos</h3>
 
-    <table class="table border">
+    <table class="table table-default border">
       <thead>
         <tr>
           <th v-for="coluna in colunas" scope="col">{{ coluna }}</th>
@@ -54,7 +73,7 @@
         <tr @click="cliqueProduto($event, produto)" v-for="produto in produtos">
           <td>{{ produto.id_produto }}</td>
           <td>{{ produto.descricao }}</td>
-          <td>{{ produto.valor }}</td>
+          <td>{{ formatarValor(produto.valor) }}</td>
         </tr>
       </tbody>
     </table>
@@ -64,8 +83,12 @@
       Incluir
     </button>
 
-    <button @click="abrirAlterarProduto" type="button" class="btn btn-primary">
+    <button @click="abrirAlterarProduto" type="button" class="btn btn-primary me-3">
       Alterar
+    </button>
+
+    <button @click="excluirProduto" type="button" class="btn btn-danger">
+      Excluir
     </button>
   </div>
 </template>
@@ -73,9 +96,10 @@
 <script type="text/javascript">
   import { Modal } from 'bootstrap'
   import axios from 'axios';
+  import DebouncedCurrencyInput from "../components/DebouncedCurrencyInput.vue";
   export default {
    components: {
-
+    DebouncedCurrencyInput
    },
    data() {
     return {
@@ -84,31 +108,25 @@
         "Descrição",
         "Valor"
       ],
-      produtos: [
-        {
-          id_produto: 1,
-          descricao: "teste",
-          valor: 0.5,
-          cod_tipo: 1
-        },
-        {
-          id_produto: 2,
-          descricao: "teste 2",
-          valor: 343.5,
-          cod_tipo: 2
-        }
-      ],
+      produtos: [],
       produtoSelecionado: {},
       produtoModal: {
         id_produto: "",
         descricao: "",
-        valor: "",
+        valor: 0.00,
         cod_tipo: 0
       },
       tipos: [],
+      myModal: null
     }
    },
    mounted() {
+    this.carregaProdutos();
+
+    this.myModal = new Modal(document.getElementById('cadastroProduto'), {
+      keyboard: false
+    });
+
     this.carregaTipos();
    },
    methods: {
@@ -121,6 +139,21 @@
       evt.target.parentNode.classList.add("selected");
       
       this.produtoSelecionado = produto;
+    },
+    carregaProdutos() {
+      var elements = document.getElementsByTagName("tr");
+      Array.prototype.forEach.call(elements, function(element) {
+        element.classList.remove("selected");
+      });
+      this.produtoSelecionado = {};
+
+      axios.get('http://localhost:8000/produtos')
+      .then((response) => {
+        this.produtos = response.data;
+      })
+      .catch((error) => {
+        console.log(error);
+      });
     },
     carregaTipos() {
       axios.get('http://localhost:8000/tipos')
@@ -139,31 +172,99 @@
 
       this.produtoModal = Object.assign({}, this.produtoSelecionado);
 
-      var myModal = new Modal(document.getElementById('cadastroProduto'), {
-        keyboard: false
-      });
-
-      myModal.show();
+      this.myModal.show();
     },
     abrirIncluirProduto() {
-      this.produtoModal = {};
+      this.produtoModal = {
+        id_produto: "",
+        descricao: "",
+        valor: 0.00,
+        cod_tipo: 0
+      };
 
-      var myModal = new Modal(document.getElementById('cadastroProduto'), {
-        keyboard: false
-      });
-
-      myModal.show();
-    },
-    formatMoney(evt, el) {
-      console.log(evt)
-      console.log(el)
+      this.myModal.show();
     },
     alterarProduto() {
+      let erro = this.validaCamposProduto(
+        this.produtoModal.descricao,
+        this.produtoModal.cod_tipo,
+        this.produtoModal.valor
+      );
 
+      if (erro != "") {
+        alert(erro);
+        return;
+      }
+
+      axios.put('http://localhost:8000/produtos', this.produtoModal)
+      .then((response) => {
+        this.myModal.hide();
+        alert("Produto alterado com sucesso!");
+        this.carregaProdutos();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
+    validaCamposProduto(descricao, cod_tipo, valor) {
+      let erro = "";
+
+      if (descricao.trim() == "") {
+        erro = "Informe um descrição.";
+      } else if (!(cod_tipo > 0)) {
+        erro = "Informe um tipo.";
+      } else if (
+        !(valor > 0) || 
+        valor == null || 
+        valor == ""
+      ) {
+        erro = "Informe um valor.";
+      }
+
+      return erro;
     },
     incluirProduto() {
+      let erro = this.validaCamposProduto(
+        this.produtoModal.descricao,
+        this.produtoModal.cod_tipo,
+        this.produtoModal.valor
+      );
 
-    }
+      if (erro != "") {
+        alert(erro);
+        return;
+      }
+
+      axios.post('http://localhost:8000/produtos', this.produtoModal)
+      .then((response) => {
+        this.myModal.hide();
+        alert("Produto incluido com sucesso!");
+        this.carregaProdutos();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
+    excluirProduto() {
+      if (Object.keys(this.produtoSelecionado).length === 0) {
+        alert("Selecione um produto!");
+        return;
+      }
+
+      axios.delete('http://localhost:8000/produtos', { params: { id: this.produtoSelecionado.id_produto } })
+      .then((response) => {
+        this.myModal.hide();
+        alert("Produto excluído com sucesso!");
+        this.carregaProdutos();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    },
+    formatarValor(valor) {
+      let valorFormatado = Number(valor).toLocaleString('pt-br', { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+      return valorFormatado;
+    },
    }
   }
 </script>

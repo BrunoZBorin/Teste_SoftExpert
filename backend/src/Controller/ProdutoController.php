@@ -95,7 +95,12 @@ class ProdutoController
      */
     public function all()
     {
-        $sth = $this->pdo->prepare("SELECT * FROM produtos ORDER BY ID_PRODUTO;");
+        $sth = $this->pdo->prepare("SELECT 
+            p.*, 
+            t.imposto 
+        FROM produtos p 
+        INNER JOIN tipos t ON (t.id_tipo = p.cod_tipo) 
+        ORDER BY p.id_produto;");
         $sth->execute();
         try
         {

@@ -10,7 +10,7 @@ header("Access-Control-Allow-Headers: *");
 
 use Teste\Pdo\Controller\ProdutoController;
 use Teste\Pdo\Controller\TipoController;
-
+use Teste\Pdo\Controller\VendaController;
 
 class Routes
 {
@@ -19,6 +19,7 @@ class Routes
         $pdo = \Teste\Pdo\Infrastructure\Persistence\ConnectionCreator::createConnection();
         $produtoController = new ProdutoController($pdo);
         $tipoController = new TipoController($pdo);
+        $vendaController = new VendaController($pdo);
         
         switch($url)
         {
@@ -49,15 +50,27 @@ class Routes
                 {
                     $response = $tipoController->add($body);
                 }
+                else if($method == "PUT")
+                {
+                    $response = $tipoController->update($body);
+                }
+                else if($method == "DELETE")
+                {
+                    $response = $tipoController->remove($params);
+                }
                 break;
             case "/vendas":
                 if($method == "GET")
                 {
-                    $response = $tipoController->all();
+                    $response = $vendaController->all();
                 }
                 else if($method == "POST")
                 {
-                    $response = $tipoController->add($body);
+                    $response = $vendaController->add($body);
+                }
+                else if($method == "DELETE")
+                {
+                    $response = $vendaController->remove($params);
                 }
                 break;
         }

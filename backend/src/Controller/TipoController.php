@@ -16,7 +16,7 @@ class TipoController
     {
         $t = json_decode($tipo);
         $lastId = 1;
-        $sql = 'SELECT MAX(id_tipo) AS LastID FROM tipos';
+        $sql = 'SELECT COALESCE(MAX(id_tipo), 0) AS LastID FROM tipos';
         $statement = $this->pdo->prepare($sql);
         try
         {
@@ -29,8 +29,9 @@ class TipoController
         
         if($tip = $statement->fetch(\PDO::FETCH_ASSOC))
         {
-            $lastId = $tip['lastid'];
+            $lastId = $tip['lastid'] + 1;
         }
+
         $sql = 'INSERT INTO tipos (id_tipo, descricao, imposto) VALUES (:id_tipo, :descricao, :imposto)';
         $statement = $this->pdo->prepare($sql);
         $statement->bindValue(':id_tipo', $lastId);
@@ -48,11 +49,11 @@ class TipoController
         return $result;
     }
 
-    public function remove(int $id)
+    public function remove($params)
     {
-        $sql = 'DELETE FROM tipos WHERE id = ?';
+        $sql = 'DELETE FROM tipos WHERE id_tipo = ?';
         $statement = $this->pdo->prepare($sql);
-        $statement->bindValue(1, $id);
+        $statement->bindValue(1, $params['id']);
         try
         {
             $result = $statement->execute();
@@ -70,7 +71,7 @@ class TipoController
         $sql = "UPDATE tipos SET
                   descricao = :descricao,
                   imposto = :imposto
-              WHERE id_produto = :id_produto;";
+              WHERE id_tipo = :id_tipo;";
         $statement = $this->pdo->prepare($sql);
         $statement->bindValue(':id_tipo', $t->id_tipo);
         $statement->bindValue(':descricao', $t->descricao);
